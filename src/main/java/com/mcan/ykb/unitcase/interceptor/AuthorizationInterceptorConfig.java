@@ -6,12 +6,12 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Component
-public class LoginInterceptorConfig implements WebMvcConfigurer {
+public class AuthorizationInterceptorConfig implements WebMvcConfigurer {
     @Autowired
-    LoginInterceptor loginInterceptor;
+    AuthorizationInterceptor authorizationInterceptor;
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(loginInterceptor).addPathPatterns("/leave/create", "/leave/approve", "/leave/reject");
+        registry.addInterceptor(authorizationInterceptor).addPathPatterns("/leave/create", "/leave/approve", "/leave/reject");
     }
 }
