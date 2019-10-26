@@ -1,5 +1,6 @@
 package com.mcan.ykb.unitcase.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
@@ -10,7 +11,7 @@ import java.util.Set;
 @Table
 public class Employee {
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     @Column
@@ -20,8 +21,9 @@ public class Employee {
     @Type(type = "date")
     private Date startDate;
 
-    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<AnnualLeaveAction> annualLeaveActions;
+    @JsonManagedReference
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL)
+    private Set<AnnualLeaveRequest> annualLeaveRequests;
 
     public long getId() {
         return id;
@@ -47,11 +49,20 @@ public class Employee {
         this.startDate = startDate;
     }
 
-    public Set<AnnualLeaveAction> getAnnualLeaveActions() {
-        return annualLeaveActions;
+    public Set<AnnualLeaveRequest> getAnnualLeaveRequests() {
+        return annualLeaveRequests;
     }
 
-    public void setAnnualLeaveActions(Set<AnnualLeaveAction> annualLeaveActions) {
-        this.annualLeaveActions = annualLeaveActions;
+    public void setAnnualLeaveRequests(Set<AnnualLeaveRequest> annualLeaveRequests) {
+        this.annualLeaveRequests = annualLeaveRequests;
+    }
+
+    @Override
+    public String toString() {
+        return "Employee{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", startDate=" + startDate +
+                '}';
     }
 }

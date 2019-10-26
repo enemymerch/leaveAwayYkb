@@ -1,60 +1,85 @@
 package com.mcan.ykb.unitcase.service;
 
 import com.mcan.ykb.unitcase.dao.IGenericDao;
-import com.mcan.ykb.unitcase.model.AnnualLeaveAction;
+import com.mcan.ykb.unitcase.model.AnnualLeaveRequest;
 import com.mcan.ykb.unitcase.model.Employee;
+import com.mcan.ykb.unitcase.utils.Constants;
+import com.mcan.ykb.unitcase.utils.DateUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class AnnualLeaveService implements IAnnualLeaveService{
 
+    Logger logger = LoggerFactory.getLogger(AnnualLeaveService.class);
     private IGenericDao<Employee> employeeDao;
-    private IGenericDao<AnnualLeaveAction> actionDao;
+    private IGenericDao<AnnualLeaveRequest> requestDao;
+
 
 
     @Override
-    public List<AnnualLeaveAction> findAll() {
-        return actionDao.findAll();
+    public String getRemainingLeaveDay(long id) {
+        return null;
     }
 
     @Override
-    public AnnualLeaveAction findById(long id) {
-        return actionDao.findOne(id);
+    public AnnualLeaveRequest approve(long id) {
+        AnnualLeaveRequest annualLeaveRequest = findById(id);
+        annualLeaveRequest.setStatus(Constants.LeaveRequestStatus.APPROVED);
+        return update(annualLeaveRequest);
     }
 
     @Override
-    public AnnualLeaveAction create(AnnualLeaveAction action) {
-        try {
-            actionDao.save(action);
-        } catch (Exception e) {
-            return null;
+    public AnnualLeaveRequest reject(long id) {
+        AnnualLeaveRequest annualLeaveRequest = findById(id);
+        annualLeaveRequest.setStatus(Constants.LeaveRequestStatus.REJECTED);
+        return update(annualLeaveRequest);
+    }
+
+    @Override
+    public List<AnnualLeaveRequest> findAll() {
+        return requestDao.findAll();
+    }
+
+    @Override
+    public AnnualLeaveRequest findById(long id) {
+        return requestDao.findOne(id);
+    }
+
+    @Override
+    public AnnualLeaveRequest create(AnnualLeaveRequest request) throws LeaveRequestException {
+        RequestCheckResult result = getRequestCheckResult(request);
+        if (!result.isAcceptable()) {
+            throw result.getLeaveRequestException();
         }
-        return action;
+        requestDao.save(request);
+        return request;
     }
 
     @Override
-    public AnnualLeaveAction update(AnnualLeaveAction action) {
-        try {
-            actionDao.update(action);
-        }catch (Exception e) {
-            return null;
-        }
-        return action;
+    public AnnualLeaveRequest update(AnnualLeaveRequest request) {
+        getRequestCheckResult(request);
+        requestDao.update(request);
+        return request;
     }
 
     @Override
     public void deleteById(long id) {
-        actionDao.deleteById(id);
+        requestDao.deleteById(id);
     }
 
     @SuppressWarnings("unused")
     @Autowired
-    public void setActionDao(IGenericDao<AnnualLeaveAction> actionDao) {
-        this.actionDao = actionDao;
-        this.actionDao.setClazz(AnnualLeaveAction.class);
+    public void setRequestDao(IGenericDao<AnnualLeaveRequest> requestDao) {
+        this.requestDao = requestDao;
+        this.requestDao.setClazz(AnnualLeaveRequest.class);
     }
 
     @SuppressWarnings("unused")
@@ -62,5 +87,38 @@ public class AnnualLeaveService implements IAnnualLeaveService{
     public void setEmployeeDao(IGenericDao<Employee> employeeDao){
         this.employeeDao = employeeDao;
         this.employeeDao.setClazz(Employee.class);
+    }
+
+    private RequestCheckResult getRequestCheckResult(AnnualLeaveRequest leaveRequest){
+        RequestCheckResult requestCheckResult = new RequestCheckResult();
+
+        checkLeaveRequestsDateInterval(requestCheckResult, leaveRequest);
+        checkLeaveRequestsTotalWorkDay(requestCheckResult, leaveRequest);
+        checkLeaveRequestsStatus(requestCheckResult, leaveRequest);
+
+        return requestCheckResult;
+    }
+    private void checkLeaveRequestsDateInterval(RequestCheckResult requestCheckResult, AnnualLeaveRequest leaveRequest){
+        // day difference between endDate and starDate must be bigger than zero
+        long dayInterval = DateUtils.getInterval(leaveRequest.getLeaveEndDate(), leaveRequest.getLeaveStartDate(), TimeUnit.DAYS);
+        if (dayInterval<=0){
+            requestCheckResult.setAcceptable(false);
+            requestCheckResult.setLeaveRequestException(new LeaveRequestException("Start Date cannot be bigger than or equal to end date."));
+        }
+    }
+    private void checkLeaveRequestsTotalWorkDay(RequestCheckResult requestCheckResult, AnnualLeaveRequest leaveRequest){
+        // total work day cannot be bigger than day interval between endDate and startDate
+        long dayInterval = DateUtils.getInterval(leaveRequest.getLeaveEndDate(), leaveRequest.getLeaveStartDate(), TimeUnit.DAYS);
+        if(dayInterval < leaveRequest.getTotalWorkDay()) {
+            requestCheckResult.setAcceptable(false);
+            requestCheckResult.setLeaveRequestException(new LeaveRequestException("Total work day cannot be bigger than day interval between endDate and startDate."));
+        }
+    }
+    private void checkLeaveRequestsStatus(RequestCheckResult requestCheckResult, AnnualLeaveRequest leaveRequest){
+        // status of request must be pending
+        if(!Constants.LeaveRequestStatus.PENDING.equals(leaveRequest.getStatus())) {
+            requestCheckResult.setAcceptable(false);
+            requestCheckResult.setLeaveRequestException(new LeaveRequestException("Status of request must be pending."));
+        }
     }
 }

@@ -1,5 +1,7 @@
 package com.mcan.ykb.unitcase.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import net.bytebuddy.build.ToStringPlugin;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
@@ -7,13 +9,14 @@ import java.util.Date;
 
 @Entity
 @Table
-public class AnnualLeaveAction {
+public class AnnualLeaveRequest {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     @Column
+    @Type(type = "date")
     private Date leaveStartDate;
 
     @Column
@@ -21,16 +24,26 @@ public class AnnualLeaveAction {
     private Date leaveEndDate;
 
     @Column
-    @Type(type = "date")
     private int totalWorkDay;
 
     @Column
     private String status;
 
+    @JsonBackReference
     @ManyToOne
     @JoinColumn
     private Employee employee;
 
+    public AnnualLeaveRequest() {
+    }
+
+    public AnnualLeaveRequest(Date leaveStartDate, Date leaveEndDate, int totalWorkDay, String status, Employee employee){
+        this.leaveStartDate = leaveStartDate;
+        this.leaveEndDate = leaveEndDate;
+        this.totalWorkDay = totalWorkDay;
+        this.status = status;
+        this.employee = employee;
+    }
 
     public long getId() {
         return id;
@@ -78,5 +91,16 @@ public class AnnualLeaveAction {
 
     public void setEmployee(Employee employee) {
         this.employee = employee;
+    }
+
+    @Override
+    public String toString() {
+        return "AnnualLeaveRequest{" +
+                "id=" + id +
+                ", leaveStartDate=" + leaveStartDate +
+                ", leaveEndDate=" + leaveEndDate +
+                ", totalWorkDay=" + totalWorkDay +
+                ", status='" + status + '\'' +
+                '}';
     }
 }

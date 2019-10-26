@@ -1,5 +1,7 @@
 package com.mcan.ykb.unitcase.dao;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
@@ -12,6 +14,7 @@ public abstract class Dao<T> {
 
     @PersistenceContext
     EntityManager entityManager;
+    Logger logger = LoggerFactory.getLogger(Dao.class);
 
     public void setClazz( Class< T > clazzToSet ) {
         this.clazz = clazzToSet;
@@ -27,7 +30,7 @@ public abstract class Dao<T> {
     }
     @Transactional
     public void save( T entity ){
-        entityManager.persist( entity );
+            entityManager.persist( entity );
     }
     @Transactional
     public void update( T entity ){

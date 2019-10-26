@@ -1,15 +1,20 @@
 package com.mcan.ykb.unitcase.controller;
 
+import com.mcan.ykb.unitcase.model.AnnualLeaveRequest;
 import com.mcan.ykb.unitcase.model.Employee;
-import com.mcan.ykb.unitcase.service.IAnnualLeaveService;
 import com.mcan.ykb.unitcase.service.IEmployeeService;
+import com.mcan.ykb.unitcase.utils.Constants;
+import io.swagger.annotations.Api;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
+@Api(value = "Employee Handler", description = "Employee CRUD and listing endpoints")
 @RestController
 @RequestMapping("/employee")
 public class EmployeeController {
@@ -17,22 +22,45 @@ public class EmployeeController {
     Logger logger = LoggerFactory.getLogger(EmployeeController.class);
 
     @Autowired
-    private IAnnualLeaveService annualLeaveService;
-
-    @Autowired
     private IEmployeeService employeeService;
+
+
+    @GetMapping("/{id}/leave/{status}")
+    public List<AnnualLeaveRequest> getLeavesByStatus(@PathVariable(required = true, name = "status") String status , @PathVariable(required = true, name = "employeeId") long employeeId){
+        List<AnnualLeaveRequest> leaves = null;
+        switch (status){
+            case Constants.LeaveRequestStatus.PENDING:
+                leaves = employeeService.getPendingLeaves(employeeId);
+                break;
+            case Constants.LeaveRequestStatus.REJECTED:
+                leaves = employeeService.getRejectedLeaves(employeeId);
+                break;
+            case Constants.LeaveRequestStatus.APPROVED:
+                leaves = employeeService.getApprovedLeaves(employeeId);
+                break;
+            default:
+                leaves = new ArrayList<AnnualLeaveRequest>();
+        }
+        return leaves;
+    }
 
     @GetMapping("/findAll")
     public List<Employee> findAll(){
         return employeeService.findAll();
     }
 
-    @GetMapping("/findById/{id}")
+    @GetMapping("/findById/{employeeId}")
     @ResponseBody
-    public Employee findById(@PathVariable(required = true, name = "id") long id){
-        return employeeService.findById(id);
+    public Employee findById(@PathVariable(required = true, name = "employeeId") long employeeId){
+        return employeeService.findById(employeeId);
     }
 
+    @GetMapping("/leave/remaining/{employeeId}")
+    public long getRemainingAnnulLeaveDayCount(@PathVariable(required = true, name = "employeeId") long employeeId){
+        long remainingDayCount = -1;
+        remainingDayCount = employeeService.getRemainingAnnulLeaveDayCount(employeeId);
+        return remainingDayCount;
+    }
     @PostMapping("create")
     public Employee create(@RequestBody Employee employee){
         return employeeService.create(employee);
@@ -44,7 +72,7 @@ public class EmployeeController {
     }
 
     @DeleteMapping("/delete/{id}")
-    public void deleteById(@PathVariable(required = true, name = "id") long id){
-        employeeService.deleteById(id);
+    public void deleteById(@PathVariable(required = true, name = "employeeId") long employeeId){
+        employeeService.deleteById(employeeId);
     }
 }
