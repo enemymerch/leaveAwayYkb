@@ -1,7 +1,6 @@
 package com.mcan.ykb.unitcase.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import net.bytebuddy.build.ToStringPlugin;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
