@@ -53,4 +53,8 @@ public class DateUtils {
 
         return workDays;
     }
+
+    public static boolean isDateInIntervalofTwoDates(Date date, Date startDate, Date endDate) {
+        return (date.getTime()-startDate.getTime() >= 0) && (endDate.getTime()-date.getTime() >= 0);
+    }
 }

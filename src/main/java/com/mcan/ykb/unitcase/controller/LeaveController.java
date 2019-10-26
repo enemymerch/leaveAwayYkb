@@ -5,6 +5,7 @@ import com.mcan.ykb.unitcase.model.AnnualLeaveRequest;
 import com.mcan.ykb.unitcase.service.IAnnualLeaveService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,15 +20,15 @@ public class LeaveController {
     private IAnnualLeaveService annualLeaveService;
 
     @ApiOperation(value = "Approve leave request")
-    @PostMapping("/approve/{id}")
-    public AnnualLeaveRequest approveRequest(@PathVariable(required = true, name = "id") long id){
-        return annualLeaveService.approve(id);
+    @PostMapping("/approve/{requestId}")
+    public AnnualLeaveRequest approveRequest(@PathVariable(required = true, name = "requestId") long requestId){
+        return annualLeaveService.approve(requestId);
     }
 
     @ApiOperation(value = "Rejects leave request")
-    @PostMapping("/reject/{id}")
-    public AnnualLeaveRequest rejectRequest(@PathVariable(required = true, name = "id") long id){
-        return annualLeaveService.reject(id);
+    @PostMapping("/reject/{requestId}")
+    public AnnualLeaveRequest rejectRequest(@PathVariable(required = true, name = "requestId") long requestId){
+        return annualLeaveService.reject(requestId);
     }
 
     @ApiOperation(value = "List of all employees", response = List.class)
@@ -37,15 +38,22 @@ public class LeaveController {
     }
 
     @ApiOperation(value = "Finds an leave request by requestId.")
-    @GetMapping("/findById/{id}")
+    @GetMapping("/findById/{requestId}")
     @ResponseBody
-    public AnnualLeaveRequest findById(@PathVariable(required = true, name = "id") long id){
-        return annualLeaveService.findById(id);
+    public AnnualLeaveRequest findById(@PathVariable(required = true, name = "requestId") long requestId){
+        return annualLeaveService.findById(requestId);
     }
 
     @ApiOperation(value = "Create leave request")
     @PostMapping("create")
-    public AnnualLeaveRequest create(@RequestBody AnnualLeaveRequest annualLeaveRequest) throws LeaveRequestException {
+    public AnnualLeaveRequest create(@ApiParam(name = "example", value = "\n{\n" +
+            "\t\"leaveStartDate\":\"2019-10-28\",\n" +
+            "\t\"leaveEndDate\":\"2019-11-10\",\n" +
+            "\t\"employee\" : {\n" +
+            "\t\t\"id\" : 1\n" +
+            "\t}\n" +
+            "\t\n" +
+            "}") @RequestBody AnnualLeaveRequest annualLeaveRequest) throws LeaveRequestException {
         return annualLeaveService.create(annualLeaveRequest);
     }
 
@@ -56,8 +64,8 @@ public class LeaveController {
     }
 
     @ApiOperation(value = "Delete leave request")
-    @DeleteMapping("/delete/{id}")
-    public void deleteById(@PathVariable(required = true, name = "id") long id){
-        annualLeaveService.deleteById(id);
+    @DeleteMapping("/delete/{requestId}")
+    public void deleteById(@PathVariable(required = true, name = "requestId") long requestId){
+        annualLeaveService.deleteById(requestId);
     }
 }

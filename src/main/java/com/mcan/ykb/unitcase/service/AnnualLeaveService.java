@@ -54,12 +54,17 @@ public class AnnualLeaveService implements IAnnualLeaveService{
 
     @Override
     public AnnualLeaveRequest create(AnnualLeaveRequest request) throws LeaveRequestException {
+        if (request.getEmployee() == null) {
+            throw new LeaveRequestException("No emplyoee object found");
+        }
+        // calculate the working days between starting and ending dates of the leave request
+        checkAndCorrectTotalWorkingDays(request);
+        request.setStatus(Constants.LeaveRequestStatus.PENDING);
+
         RequestCheckResult result = getRequestCheckResult(request);
         if (!result.isAcceptable()) {
             throw result.getLeaveRequestException();
         }
-        // calculate the working days between starting and ending dates of the leave request
-        checkAndCorrectTotalWorkingDays(request);
         requestDao.save(request);
         return request;
     }
@@ -98,7 +103,8 @@ public class AnnualLeaveService implements IAnnualLeaveService{
         String year = dateFormat.format(request.getLeaveStartDate());
         for (String holiday : Constants.holidays) {
             try {
-                if (!DateUtils.isWeekend(dateFormat.parse(year+"-"+holiday))) {
+                Date nationalHoliday = dateFormat.parse(year+"-"+holiday);
+                if ( DateUtils.isDateInIntervalofTwoDates(nationalHoliday, request.getLeaveStartDate(), request.getLeaveEndDate()) && !DateUtils.isWeekend(nationalHoliday)) {
                     ++natiaolHolidays;
                 }
             }catch (Exception e)  {
@@ -124,7 +130,7 @@ public class AnnualLeaveService implements IAnnualLeaveService{
     private void checkEployeesRemainingLeaveDays(RequestCheckResult requestCheckResult, AnnualLeaveRequest leaveRequest) {
         // going to check if the employee has leave rights
         long remainingDays =  employeeService.getRemainingAnnulLeaveDayCount(leaveRequest.getEmployee().getId());
-        if (remainingDays>=leaveRequest.getTotalWorkDay()) {
+        if (!(remainingDays>=leaveRequest.getTotalWorkDay())) {
             requestCheckResult.setAcceptable(false);
             requestCheckResult.setLeaveRequestException(new LeaveRequestException("Employee's remaining leave days is not enough"));
         }
@@ -134,7 +140,7 @@ public class AnnualLeaveService implements IAnnualLeaveService{
         // start Date must be bigger than current Date
         Date currentDate = new Date(System.currentTimeMillis());
         long dayInterval = DateUtils.getInterval(leaveRequest.getLeaveStartDate(), currentDate, TimeUnit.DAYS);
-        if (dayInterval<1) {
+        if (dayInterval+1 < 1) {
             requestCheckResult.setAcceptable(false);
             requestCheckResult.setLeaveRequestException(new LeaveRequestException("Leave request must the assigned to future date"));
         }
@@ -143,7 +149,7 @@ public class AnnualLeaveService implements IAnnualLeaveService{
     private void checkLeaveRequestsDateInterval(RequestCheckResult requestCheckResult, AnnualLeaveRequest leaveRequest){
         // day difference between endDate and starDate must be bigger than zero
         long dayInterval = DateUtils.getInterval(leaveRequest.getLeaveEndDate(), leaveRequest.getLeaveStartDate(), TimeUnit.DAYS);
-        if (dayInterval<=0){
+        if (dayInterval <= 0){
             requestCheckResult.setAcceptable(false);
             requestCheckResult.setLeaveRequestException(new LeaveRequestException("Start Date cannot be bigger than or equal to end date."));
         }
@@ -151,7 +157,7 @@ public class AnnualLeaveService implements IAnnualLeaveService{
     private void checkLeaveRequestsTotalWorkDay(RequestCheckResult requestCheckResult, AnnualLeaveRequest leaveRequest){
         // total work day cannot be bigger than day interval between endDate and startDate
         long dayInterval = DateUtils.getInterval(leaveRequest.getLeaveEndDate(), leaveRequest.getLeaveStartDate(), TimeUnit.DAYS);
-        if(dayInterval < leaveRequest.getTotalWorkDay()) {
+        if(dayInterval+1 < leaveRequest.getTotalWorkDay()) {
             requestCheckResult.setAcceptable(false);
             requestCheckResult.setLeaveRequestException(new LeaveRequestException("Total work day cannot be bigger than day interval between endDate and startDate."));
         }

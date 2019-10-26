@@ -6,6 +6,7 @@ import com.mcan.ykb.unitcase.service.IEmployeeService;
 import com.mcan.ykb.unitcase.utils.Constants;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +25,8 @@ public class EmployeeController {
     @Autowired
     private IEmployeeService employeeService;
 
-    @ApiOperation(value = "Gets Employees leave requests by request status.")
-    @GetMapping("/{id}/leave/{status}")
+    @ApiOperation(value = "Gets Employees leave requests by request status. Status can be : pending, aproved and rejected")
+    @GetMapping("/{employeeId}/leave/{status}")
     public List<AnnualLeaveRequest> getLeavesByStatus(@PathVariable(required = true, name = "status") String status , @PathVariable(required = true, name = "employeeId") long employeeId){
         List<AnnualLeaveRequest> leaves = null;
         switch (status){
@@ -66,7 +67,10 @@ public class EmployeeController {
 
     @ApiOperation(value = "Create employee")
     @PostMapping("create")
-    public Employee create(@RequestBody Employee employee){
+    public Employee create(@ApiParam(name = "Example ", value = "Example json : \n{\n" +
+            "  \"name\": \"Can Yılmaz\",\n" +
+            "  \"startDate\": \"2019-10-26\"\n" +
+            "}") @RequestBody Employee employee){
         return employeeService.create(employee);
     }
 
@@ -77,7 +81,7 @@ public class EmployeeController {
     }
 
     @ApiOperation(value = "Delete employee")
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/delete/{employeeId}")
     public void deleteById(@PathVariable(required = true, name = "employeeId") long employeeId){
         employeeService.deleteById(employeeId);
     }
