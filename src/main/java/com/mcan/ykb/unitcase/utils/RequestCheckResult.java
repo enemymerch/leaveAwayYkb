@@ -1,6 +1,6 @@
-package com.mcan.ykb.unitcase.service;
+package com.mcan.ykb.unitcase.utils;
 
-import com.mcan.ykb.unitcase.service.LeaveRequestException;
+import com.mcan.ykb.unitcase.exception.LeaveRequestException;
 
 public class RequestCheckResult {
     private boolean isAcceptable;

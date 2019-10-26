@@ -3,6 +3,8 @@ package com.mcan.ykb.unitcase.utils;
 import org.apache.tomcat.util.http.parser.Authorization;
 
 public class Constants {
+    public static final String[] holidays = {"01-01", "04-01", "04-23", "01-05", "05-19", "07-15", "08-30", "09-29"};
+
     public static class LeaveRequestStatus {
         public static final String PENDING          = "pending";
         public static final String APPROVED         = "approved";
@@ -22,4 +24,6 @@ public class Constants {
     public static class Date{
         public static final long DaysInYear                      = 365;
     }
+
+
 }

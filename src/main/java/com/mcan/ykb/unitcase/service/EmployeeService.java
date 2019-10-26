@@ -8,19 +8,13 @@ import com.mcan.ykb.unitcase.utils.DateUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.text.SimpleDateFormat;
-import java.time.Period;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 @Service
 public class EmployeeService implements IEmployeeService {
-    @Autowired
-    private IAnnualLeaveService annualLeaveService;
-
     private IGenericDao<Employee> employeeDao;
 
     @Override
@@ -103,7 +97,7 @@ public class EmployeeService implements IEmployeeService {
         if ( intervalInYears >= 1 && intervalInYears <= 5 ) {
             // between 1 - 5(included) :15
             leaveDayCount = 15;
-        } else if (intervalInYears > 5  && intervalInYears <+= 10) {
+        } else if (intervalInYears > 5  && intervalInYears <= 10) {
             //between 5 - 10(included) : 18
             leaveDayCount = 18;
         } else if (intervalInYears > 10) {

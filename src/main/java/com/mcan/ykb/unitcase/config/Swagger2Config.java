@@ -1,4 +1,4 @@
-package com.mcan.ykb.unitcase.utils.swagger;
+package com.mcan.ykb.unitcase.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

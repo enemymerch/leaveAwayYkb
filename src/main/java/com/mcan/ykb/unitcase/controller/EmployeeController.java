@@ -5,6 +5,7 @@ import com.mcan.ykb.unitcase.model.Employee;
 import com.mcan.ykb.unitcase.service.IEmployeeService;
 import com.mcan.ykb.unitcase.utils.Constants;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 @Api(value = "Employee Handler", description = "Employee CRUD and listing endpoints")
 @RestController
@@ -24,7 +24,7 @@ public class EmployeeController {
     @Autowired
     private IEmployeeService employeeService;
 
-
+    @ApiOperation(value = "Gets Employees leave requests by request status.")
     @GetMapping("/{id}/leave/{status}")
     public List<AnnualLeaveRequest> getLeavesByStatus(@PathVariable(required = true, name = "status") String status , @PathVariable(required = true, name = "employeeId") long employeeId){
         List<AnnualLeaveRequest> leaves = null;
@@ -43,34 +43,40 @@ public class EmployeeController {
         }
         return leaves;
     }
-
+    @ApiOperation(value = "List of all employees", response = List.class)
     @GetMapping("/findAll")
     public List<Employee> findAll(){
         return employeeService.findAll();
     }
 
+    @ApiOperation(value = "Finds an employee by employeeId.")
     @GetMapping("/findById/{employeeId}")
     @ResponseBody
     public Employee findById(@PathVariable(required = true, name = "employeeId") long employeeId){
         return employeeService.findById(employeeId);
     }
 
+    @ApiOperation(value = "Remaining days of employees annual leave rights")
     @GetMapping("/leave/remaining/{employeeId}")
     public long getRemainingAnnulLeaveDayCount(@PathVariable(required = true, name = "employeeId") long employeeId){
         long remainingDayCount = -1;
         remainingDayCount = employeeService.getRemainingAnnulLeaveDayCount(employeeId);
         return remainingDayCount;
     }
+
+    @ApiOperation(value = "Create employee")
     @PostMapping("create")
     public Employee create(@RequestBody Employee employee){
         return employeeService.create(employee);
     }
 
+    @ApiOperation(value = "Update employee")
     @PostMapping("update")
     public Employee update(@RequestBody Employee employee){
         return employeeService.update(employee);
     }
 
+    @ApiOperation(value = "Delete employee")
     @DeleteMapping("/delete/{id}")
     public void deleteById(@PathVariable(required = true, name = "employeeId") long employeeId){
         employeeService.deleteById(employeeId);

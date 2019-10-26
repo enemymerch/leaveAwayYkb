@@ -1,12 +1,11 @@
 package com.mcan.ykb.unitcase.service;
 
 import com.mcan.ykb.unitcase.model.AnnualLeaveRequest;
+import com.mcan.ykb.unitcase.exception.LeaveRequestException;
 
 import java.util.List;
 
 public interface IAnnualLeaveService {
-    String getRemainingLeaveDay(long employeeId);
-
     AnnualLeaveRequest approve(long employeeId);
 
     AnnualLeaveRequest reject(long employeeId);
