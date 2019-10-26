@@ -25,6 +25,7 @@ public class LoginInterceptor extends HandlerInterceptorAdapter {
         boolean isAuthorized = authorizationHeader.equals(Constants.Authorization.basicAuthorizationToken);
         logger.debug("is authorized ? : " + isAuthorized);
         return isAuthorized;
+
         
     }
 }
