@@ -27,7 +27,5 @@ public class AuthorizationInterceptor extends HandlerInterceptorAdapter {
         // returning true for testing
         isAuthorized = true;
         return isAuthorized;
-
-        
     }
 }
